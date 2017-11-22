@@ -25,14 +25,15 @@ val kotlin_version: String by extra
 
 repositories {
     mavenCentral()
+    jcenter()
 }
 
 dependencies {
     compile(kotlinModule("stdlib-jre8", kotlin_version))
+    compile("me.sargunvohra.lib:cakeparse:1.1.1")
     testCompile("io.kotlintest:kotlintest:2.0.7")
 }
 
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
 }
-
