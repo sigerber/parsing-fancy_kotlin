@@ -30,7 +30,7 @@ repositories {
 
 dependencies {
     compile(kotlinModule("stdlib-jre8", kotlin_version))
-    compile("me.sargunvohra.lib:cakeparse:1.1.1")
+    compile("com.github.h0tk3y.betterParse:better-parse:0.3.1")
     testCompile("io.kotlintest:kotlintest:2.0.7")
 }
 
