@@ -12,7 +12,8 @@ class ThreatModelParserTest : FreeSpec() {
     private val tokenizer = ThreatModelParser.tokenizer
     private val targetFragment =
             """Targets:
-               |    Tyro is defended by jost.
+               |    Tyro is defended by jost
+               |    TheVault is undefended
             """.trimMargin()
 
     init {
@@ -47,6 +48,7 @@ class ThreatModelParserTest : FreeSpec() {
                 val targets = ThreatModelParser.targetSection.parseToEnd(tokenizer.tokenize(targetFragment))
 
                 targets should contain(Target("Tyro", "jost"))
+                targets should contain(Target("TheVault"))
             }
         }
     }
