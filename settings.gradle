@@ -1,0 +1,3 @@
+rootProject.name = 'parsing-fancy_kotlin'
+rootProject.buildFileName = 'build.gradle.kts'
+
