@@ -12,7 +12,7 @@ object ThreatModelParser : Grammar<List<AttackResult>>() {
 
     private val COMMA by token(",\\s?")
     private val LBRACE by token("\\[")
-    private val RBRACE by token("\\]")
+    private val RBRACE by token("]")
 
     private val VERSUS by token("vs")
 
@@ -23,32 +23,31 @@ object ThreatModelParser : Grammar<List<AttackResult>>() {
     private val WEAKNESSES_SINGULAR by token("is weak against")
     private val WEAKNESSES_PLURAL by token("are weak against")
 
-    private val IDENT by token("[A-Za-z\\-_]+")
+    private val IDENT by token("\\w+")
 
-    private val WHITESPACE by token("\\s", ignore = true)
-    private val NEWLINES by token("[\r\n]", ignore = true)
+    private val WHITESPACE by token("\\s+", ignore = true)
 
     val oneIdentifier = IDENT use { listOf(text) }
     private val manyIdentifiers = (skip(LBRACE) and separatedTerms(IDENT, COMMA) and skip(RBRACE)) map { it.map { it.text } }
     val identifierList = oneIdentifier or manyIdentifiers
 
     private val noDefenses = NO_DEFENCES asJust emptyList<CounterMeasure>()
-    private val someDefenses = skip(DEFENSES_PREFIX) and identifierList map { it.map { CounterMeasure(it) } }
-    private val defences = (noDefenses or someDefenses)
+    private val someDefenses = (skip(DEFENSES_PREFIX) and identifierList) map { it.map(::CounterMeasure) }
+    private val defences = noDefenses or someDefenses
 
     private val target = IDENT and defences use { Target(t1.text, t2.toSet()) }
     private val targets = separatedTerms(target, WHITESPACE)
     val targetSection = skip(TARGET_HEADER) and targets
 
     private val noWeaknesses = NO_WEAKNESSES asJust emptyList<CounterMeasure>()
-    private val someWeaknesses = skip(WEAKNESSES_PLURAL or WEAKNESSES_SINGULAR) and identifierList map { it.map { CounterMeasure(it) } }
+    private val someWeaknesses = skip(WEAKNESSES_PLURAL or WEAKNESSES_SINGULAR) and identifierList map { it.map(::CounterMeasure) }
     private val weaknesses = noWeaknesses or someWeaknesses
 
     private val threat = IDENT and weaknesses use { Threat(t1.text, t2.toSet()) }
     private val threats = separatedTerms(threat, WHITESPACE)
     val threatSection = skip(THREAT_HEADER) and threats
 
-    private val scenario = IDENT and skip(VERSUS) and IDENT map { Pair(it.t1.text, it.t2.text) }
+    private val scenario = IDENT and skip(VERSUS) and IDENT use { Pair(t1.text, t2.text) }
     private val scenarios = separatedTerms(scenario, WHITESPACE)
     val scenarioSection = skip(SCENARIO_HEADER) and scenarios
 

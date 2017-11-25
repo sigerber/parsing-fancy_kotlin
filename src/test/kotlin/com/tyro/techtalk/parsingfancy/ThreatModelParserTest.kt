@@ -2,12 +2,10 @@ package com.tyro.techtalk.parsingfancy
 
 import com.github.h0tk3y.betterParse.grammar.parseToEnd
 import com.github.h0tk3y.betterParse.parser.parseToEnd
-import com.github.h0tk3y.betterParse.utils.Tuple2
 import com.tyro.techtalk.parsingfancy.threatmodel.Compromised
 import com.tyro.techtalk.parsingfancy.threatmodel.Target
 import com.tyro.techtalk.parsingfancy.threatmodel.Threat
 import com.tyro.techtalk.parsingfancy.threatmodel.UnCompromised
-import io.kotlintest.TestCaseConfig
 import io.kotlintest.matchers.contain
 import io.kotlintest.matchers.containsInOrder
 import io.kotlintest.matchers.should
@@ -46,10 +44,10 @@ class ThreatModelParserTest : FreeSpec() {
 
     init {
         "The identifier list parser" - {
-            "parse an identifier with dashes and underscores" {
-                val result = ThreatModelParser.oneIdentifier.parseToEnd(tokenizer.tokenize("abc-de_f"))
+            "parse an identifier as a string" {
+                val result = ThreatModelParser.oneIdentifier.parseToEnd(tokenizer.tokenize("abcdef"))
 
-                result should contain("abc-de_f")
+                result should contain("abcdef")
             }
 
             "parse a list of identifiers with spaces after the comma" {
