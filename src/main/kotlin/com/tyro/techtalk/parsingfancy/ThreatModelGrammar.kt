@@ -2,6 +2,10 @@ package com.tyro.techtalk.parsingfancy
 
 import com.github.h0tk3y.betterParse.combinators.*
 import com.github.h0tk3y.betterParse.grammar.Grammar
+import com.github.h0tk3y.betterParse.lexer.TokenMatch
+import com.github.h0tk3y.betterParse.parser.NoMatchingToken
+import com.github.h0tk3y.betterParse.parser.ParseResult
+import com.github.h0tk3y.betterParse.parser.Parser
 import com.tyro.techtalk.parsingfancy.threatmodel.*
 import com.tyro.techtalk.parsingfancy.threatmodel.Target
 
@@ -27,39 +31,19 @@ object ThreatModelParser : Grammar<List<AttackResult>>() {
 
     private val WHITESPACE by token("\\s+", ignore = true)
 
-    val oneIdentifier = IDENT use { listOf(text) }
-    private val manyIdentifiers = (skip(LBRACE) and separatedTerms(IDENT, COMMA) and skip(RBRACE)) map { it.map { it.text } }
-    val identifierList = oneIdentifier or manyIdentifiers
+    val identifierList: Parser<List<String>> = todo()
 
-    private val noDefenses = NO_DEFENCES asJust emptyList<CounterMeasure>()
-    private val someDefenses = (skip(DEFENSES_PREFIX) and identifierList) map { it.map(::CounterMeasure) }
-    private val defences = noDefenses or someDefenses
+    val targetSection: Parser<List<Target>> = todo()
 
-    private val target = IDENT and defences use { Target(t1.text, t2.toSet()) }
-    private val targets = separatedTerms(target, WHITESPACE)
-    val targetSection = skip(TARGET_HEADER) and targets
+    val threatSection: Parser<List<Threat>> = todo()
 
-    private val noWeaknesses = NO_WEAKNESSES asJust emptyList<CounterMeasure>()
-    private val someWeaknesses = skip(WEAKNESSES_PLURAL or WEAKNESSES_SINGULAR) and identifierList map { it.map(::CounterMeasure) }
-    private val weaknesses = noWeaknesses or someWeaknesses
+    val scenarioSection: Parser<List<Pair<String, String>>> = todo()
 
-    private val threat = IDENT and weaknesses use { Threat(t1.text, t2.toSet()) }
-    private val threats = separatedTerms(threat, WHITESPACE)
-    val threatSection = skip(THREAT_HEADER) and threats
+    override val rootParser: Parser<List<AttackResult>> by todo()
+}
 
-    private val scenario = IDENT and skip(VERSUS) and IDENT use { Pair(t1.text, t2.text) }
-    private val scenarios = separatedTerms(scenario, WHITESPACE)
-    val scenarioSection = skip(SCENARIO_HEADER) and scenarios
-
-    override val rootParser by targetSection and threatSection and scenarioSection map { (targets, threats, scenarios) ->
-        val targetMap = targets.map { it.name to it }.toMap()
-        val threatMap = threats.map { it.name to it }.toMap()
-
-        scenarios.map { (threatName, targetName) ->
-            val target = targetMap.getOrDefault(targetName, Target(targetName))
-            val threat = threatMap.getOrDefault(threatName, Threat(threatName))
-
-            AttackScenario.modelAttack(target, threat)
-        }
+fun <T> todo() = object : Parser<T> {
+    override fun tryParse(tokens: Sequence<TokenMatch>): ParseResult<T> {
+        return NoMatchingToken(tokens.first())
     }
 }
