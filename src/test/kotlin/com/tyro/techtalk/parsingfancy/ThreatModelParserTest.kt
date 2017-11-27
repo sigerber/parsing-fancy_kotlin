@@ -15,22 +15,23 @@ class ThreatModelParserTest {
     private val tokenizer = ThreatModelParser.tokenizer
     private val targetFragment =
             """Targets:
-               |    ??? is undefended
-               |    ??? is defended by ???
-               |    ??? is defended by [???, ???]
+               |    Equifax is undefended
+               |    Tyro is defended by types
+               |    Earth is defended by [TheDoctor, CaptainPlanet]
             """.trimMargin()
 
     private val threatFragment =
             """Threats:
-               |    ??? has no weaknesses
-               |    ??? is weak against ???
-               |    ??? is weak against [???, ???]
+               |    GlobalWarming has no weaknesses
+               |    Javascript is weak against types
+               |    TheMaster is weak against [TheDoctor, UntemperedSchism]
                """.trimMargin()
 
     private val scenarioFragment =
             """Scenarios:
-               | ??? vs ???
-               | ??? vs ???
+               | TheMaster vs Earth
+               | GlobalWarming vs Earth
+               | Javascript vs Tyro
                """.trimMargin()
 
     private val entireDSL =
@@ -43,20 +44,6 @@ class ThreatModelParserTest {
 
 
     @Test
-    fun `the identifier parser should parse a command separated list of tokens`() {
-        val result = ThreatModelParser.identifierList.tryParseToEnd(tokenizer.tokenize("[abc, def]"))
-
-        when (result) {
-            is Parsed -> {
-                result.value should containsInOrder("abc", "def")
-            }
-            is ErrorResult -> {
-                fail("Could not parse threat scenarios: $result")
-            }
-        }
-    }
-
-    @Test
     fun `the identifier parser should parse a single identifier as a list`() {
         val result = ThreatModelParser.identifierList.tryParseToEnd(tokenizer.tokenize("abc"))
 
@@ -65,7 +52,21 @@ class ThreatModelParserTest {
                 result.value should contain("abc")
             }
             is ErrorResult -> {
-                fail("Could not parse threat scenarios: $result")
+                fail("Could not parse identifiers: $result")
+            }
+        }
+    }
+
+    @Test
+    fun `the identifier parser should parse a command separated list of tokens`() {
+        val result = ThreatModelParser.identifierList.tryParseToEnd(tokenizer.tokenize("[abc, def]"))
+
+        when (result) {
+            is Parsed -> {
+                result.value should containsInOrder("abc", "def")
+            }
+            is ErrorResult -> {
+                fail("Could not parse identifiers: $result")
             }
         }
     }
@@ -78,11 +79,12 @@ class ThreatModelParserTest {
             is Parsed -> {
                 val targets = result.value
 
-                targets should contain(Target("TheVault"))
-                targets should contain(Target("Tyro", "jost", "obscurity"))
+                targets should contain(Target("Equifax"))
+                targets should contain(Target("Tyro", "types"))
+                targets should contain(Target("Earth", "TheDoctor", "CaptainPlanet"))
             }
             is ErrorResult -> {
-                fail("Could not parse threat scenarios: $result")
+                fail("Could not parse targets: $result")
             }
         }
     }
@@ -95,12 +97,12 @@ class ThreatModelParserTest {
             is Parsed -> {
                 val threats = result.value
 
-                threats should contain(Threat("Hackers", "obscurity"))
                 threats should contain(Threat("GlobalWarming"))
-                threats should contain(Threat("Kotlin", "Scala", "Haskell"))
+                threats should contain(Threat("Javascript", "types"))
+                threats should contain(Threat("TheMaster", "TheDoctor", "UntemperedSchism"))
             }
             is ErrorResult -> {
-                fail("Could not parse threat scenarios: $result")
+                fail("Could not parse threats: $result")
             }
         }
     }
@@ -112,11 +114,12 @@ class ThreatModelParserTest {
         when (result) {
             is Parsed -> {
                 val scenarios = result.value
-                scenarios should contain(Pair("Hackers", "Tyro"))
-                scenarios should contain(Pair("GlobalWarming", "Tyro"))
+                scenarios should contain(Pair("TheMaster", "Earth"))
+                scenarios should contain(Pair("GlobalWarming", "Earth"))
+                scenarios should contain(Pair("Javascript", "Tyro"))
             }
             is ErrorResult -> {
-                fail("Could not parse threat scenarios: $result")
+                fail("Could not parse scenarios: $result")
             }
         }
     }
@@ -129,9 +132,10 @@ class ThreatModelParserTest {
             is Parsed -> {
                 result.value[0] shouldBe UnCompromised
                 result.value[1] shouldBe Compromised
+                result.value[2] shouldBe UnCompromised
             }
             is ErrorResult -> {
-                fail("Could not parse threat scenarios: $result")
+                fail("Could not parse attack scenarios: $result")
             }
         }
 
