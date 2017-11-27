@@ -10,7 +10,7 @@ object ThreatModelParser : Grammar<List<AttackResult>>() {
     private val THREAT_HEADER by token("Threats:")
     private val SCENARIO_HEADER by token("Scenarios:")
 
-    private val COMMA by token(",\\s?")
+    private val COMMA by token(",")
     private val LBRACE by token("\\[")
     private val RBRACE by token("]")
 
