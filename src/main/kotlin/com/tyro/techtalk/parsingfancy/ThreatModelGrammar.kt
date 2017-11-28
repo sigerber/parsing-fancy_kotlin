@@ -1,10 +1,6 @@
 package com.tyro.techtalk.parsingfancy
 
-import com.github.h0tk3y.betterParse.combinators.*
 import com.github.h0tk3y.betterParse.grammar.Grammar
-import com.github.h0tk3y.betterParse.lexer.TokenMatch
-import com.github.h0tk3y.betterParse.parser.NoMatchingToken
-import com.github.h0tk3y.betterParse.parser.ParseResult
 import com.github.h0tk3y.betterParse.parser.Parser
 import com.tyro.techtalk.parsingfancy.threatmodel.*
 import com.tyro.techtalk.parsingfancy.threatmodel.Target
@@ -25,7 +21,6 @@ object ThreatModelParser : Grammar<List<AttackResult>>() {
 
     private val NO_WEAKNESSES by token("has no weaknesses")
     private val WEAKNESSES_SINGULAR by token("is weak against")
-    private val WEAKNESSES_PLURAL by token("are weak against")
 
     private val IDENT by token("\\w+")
 
@@ -42,8 +37,3 @@ object ThreatModelParser : Grammar<List<AttackResult>>() {
     override val rootParser: Parser<List<AttackResult>> by todo()
 }
 
-fun <T> todo() = object : Parser<T> {
-    override fun tryParse(tokens: Sequence<TokenMatch>): ParseResult<T> {
-        return NoMatchingToken(tokens.first())
-    }
-}
